@@ -1,25 +1,38 @@
 import React from 'react';
-import logo from './logo.svg';
 import './App.css';
+import PrivateRoute from './components/PrivateRoute/PrivateRoute';
+import HomeScreen from './screens/HomeScreen/HomeScreen';
+import LoginScreen from './screens/LoginScreen/LoginScreen';
+import RegisterScreen from './screens/RegisterScreen/RegisterScreen';
+import NotFoundScreen from './screens/NotFoundScreen/NotFoundScreen';
+import CssBaseline from '@material-ui/core/CssBaseline';
+import {
+  BrowserRouter as Router,
+  Switch,
+  Route
+} from "react-router-dom";
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <>
+      <CssBaseline />
+      <Router>
+        <div>
+          <Switch>
+            <Route path='/login'>
+              <LoginScreen />
+            </Route>
+            <Route path='/register'>
+              <RegisterScreen />
+            </Route>
+            <PrivateRoute path='/' exact component={HomeScreen} />
+            <Route path='/'>
+              <NotFoundScreen />
+            </Route>
+          </Switch>
+        </div>
+      </Router>
+    </>
   );
 }
 
