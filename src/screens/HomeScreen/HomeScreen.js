@@ -1,10 +1,14 @@
 import React from 'react';
 import './HomeScreen.css';
+import StockDashboard from './../../components/StockDashboard/StockDashboard';
+import NavigationModule from './../../components/NavigationModule/NavigationModule';
+import { SCREENS } from './../../common/constants';
 
 function HomeScreen() {
   return (
-    <div>
-      Home
+    <div className='screen'>
+      <NavigationModule displayTitle={SCREENS.STOCK}/>
+      <StockDashboard displayTitle={SCREENS.STOCK}/>
     </div>
   );
 }

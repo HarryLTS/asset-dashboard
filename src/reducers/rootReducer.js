@@ -1,17 +1,17 @@
 const initialState = {
-  client: {
-    apiRequestPending: false,
-    user: {}
-  }
+  authToken: null,
 }
+const persistedState = localStorage.getItem('reduxState')
+                       ? JSON.parse(localStorage.getItem('reduxState'))
+                       : initialState;
 
-function rootReducer(state = initialState, action) {
+
+function rootReducer(state = persistedState, action) {
     switch(action.type) {
-      case "SET_API_REQUEST_PENDING":
-        state.apiRequestPending = action.value;
-
-      case "SET_CLIENT_DATA":
-
+      case "SET_AUTH_TOKEN":
+        state.authToken = action.value;
+        return state;
+        
       default:
         return state;
     }

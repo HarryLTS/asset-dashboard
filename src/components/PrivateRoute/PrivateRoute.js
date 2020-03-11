@@ -1,15 +1,16 @@
 import React from 'react';
+import { useSelector } from 'react-redux';
 import {
-  BrowserRouter as Router,
-  Switch,
   Route,
   Redirect
 } from "react-router-dom";
 
 function PrivateRoute({ component: Component, ...rest }) {
+  const authToken = useSelector(state => state.authToken);
+
   return (
     <Route {...rest} render={(props) => (
-      false
+      authToken !== null
       ? <Component {...props} />
       : <Redirect to='/login' />
     )} />

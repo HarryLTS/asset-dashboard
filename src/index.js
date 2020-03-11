@@ -11,7 +11,12 @@ import rootReducer from './reducers/rootReducer';
 import createSagaMiddleware from 'redux-saga';
 
 const sagaMiddleware = createSagaMiddleware();
+
 const store = createStore(rootReducer, applyMiddleware(sagaMiddleware));
+
+store.subscribe(() => {
+  localStorage.setItem('reduxState', JSON.stringify(store.getState()))
+});
 
 sagaMiddleware.run(watchLogin);
 
