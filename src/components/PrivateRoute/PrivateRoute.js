@@ -6,7 +6,7 @@ import {
 } from "react-router-dom";
 
 function PrivateRoute({ component: Component, ...rest }) {
-  const authToken = useSelector(state => state.authToken);
+  const authToken = useSelector(state => state.client.authToken);
 
   return (
     <Route {...rest} render={(props) => (

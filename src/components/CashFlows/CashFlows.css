@@ -1,0 +1,10 @@
+.cash-flow-edit {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  padding-top: 20px;
+}
+
+.cash-flow-edit__expenditure {
+  padding-left: 20px;
+}

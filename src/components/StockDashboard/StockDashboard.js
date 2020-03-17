@@ -1,28 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import clsx from 'clsx';
 import { makeStyles } from '@material-ui/core/styles';
-import CssBaseline from '@material-ui/core/CssBaseline';
-import Drawer from '@material-ui/core/Drawer';
-import Box from '@material-ui/core/Box';
-import AppBar from '@material-ui/core/AppBar';
-import Toolbar from '@material-ui/core/Toolbar';
-import List from '@material-ui/core/List';
-import Typography from '@material-ui/core/Typography';
-import Divider from '@material-ui/core/Divider';
-import IconButton from '@material-ui/core/IconButton';
-import Badge from '@material-ui/core/Badge';
 import Container from '@material-ui/core/Container';
+import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
-import Link from '@material-ui/core/Link';
-import MenuIcon from '@material-ui/icons/Menu';
-import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
-import NotificationsIcon from '@material-ui/icons/Notifications';
-import Chart from './../Chart/Chart';
-import Deposits from './../Overview/Overview';
-import Orders from './../StockOptions/StockOptions';
+import StockSummary from './../StockSummary/StockSummary';
+import Overview from './../Overview/Overview';
+import StockOptions from './../StockOptions/StockOptions';
 import Copyright from './../Copyright/Copyright';
-import NavigationModule from './../NavigationModule/NavigationModule';
+import DashboardHeader from './../DashboardHeader/DashboardHeader';
+import { useSelector, useDispatch } from 'react-redux';
+import { ACTION_TYPES } from './../../common/constants';
 
 const useStyles = makeStyles(theme => ({
   appBarSpacer: {
@@ -50,37 +39,49 @@ const useStyles = makeStyles(theme => ({
 
 export default function Dashboard(props) {
   const classes = useStyles();
-
+  const dispatch = useDispatch();
+  const authToken = useSelector(state => state.client.authToken);
+  const stockData = useSelector(state => state.client.stockData);
   const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
+  const [editMode, setEditMode] = useState(false);
 
+  useEffect(() => {
+    dispatch({
+      type: ACTION_TYPES.LOAD_CLIENT_STOCK_DATA,
+      authToken: authToken
+    });
+  }, [authToken, dispatch]);
+
+  const handleRefresh = (e) => {
+    e.preventDefault();
+    dispatch({
+      type: ACTION_TYPES.LOAD_CLIENT_STOCK_DATA,
+      authToken: authToken
+    });
+  }
 
   return (
     <main className={classes.content}>
       <div className={classes.appBarSpacer} />
-
       <Container maxWidth="lg" className={classes.container}>
         <Grid container spacing={3}>
+          <DashboardHeader
+            displayTitle={props.displayTitle}
+            editMode={editMode}
+            setEditMode={setEditMode}
+            handleRefresh={handleRefresh}
+            />
+          {/*<StockSummary classes={classes}/>*/}
+
           <Grid item xs={12}>
-            <Typography variant='h4'>
-              {props.displayTitle}
-            </Typography>
-          </Grid>
-          {/* Chart */}
-          <Grid item xs={12} md={8} lg={9}>
             <Paper className={fixedHeightPaper}>
-              <Chart />
+              {stockData !== null && <Overview title="Stock Balance" displayValue={stockData.stock_combined_value}/>}
             </Paper>
           </Grid>
-          {/* Recent Deposits */}
-          <Grid item xs={12} md={4} lg={3}>
-            <Paper className={fixedHeightPaper}>
-              <Deposits />
-            </Paper>
-          </Grid>
-          {/* Recent Orders */}
+
           <Grid item xs={12}>
             <Paper className={classes.paper}>
-              <Orders />
+              {stockData !== null && <StockOptions editMode={editMode}/>}
             </Paper>
           </Grid>
         </Grid>

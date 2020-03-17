@@ -1,5 +1,4 @@
 import React from 'react';
-import Link from '@material-ui/core/Link';
 import { makeStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import Title from './../Title/Title';
@@ -14,23 +13,20 @@ const useStyles = makeStyles({
   },
 });
 
-
-export default function Overview() {
+export default function Overview(props) {
   const classes = useStyles();
+
+  const date = new Date();
+
   return (
     <React.Fragment>
-      <Title>Balance</Title>
+      <Title>{props.title}</Title>
       <Typography component="p" variant="h4">
-        $3,024.00
+        ${props.displayValue.toFixed(2)}
       </Typography>
       <Typography color="textSecondary" className={classes.depositContext}>
-        on 15 March, 2019
+        on {date.toLocaleString('default', { month: 'long' })} {date.getDate()}, {date.getFullYear()}
       </Typography>
-      <div>
-        <Link color="primary" href="#" onClick={preventDefault}>
-          View details
-        </Link>
-      </div>
     </React.Fragment>
   );
 }

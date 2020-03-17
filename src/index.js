@@ -6,7 +6,7 @@ import App from './App';
 import * as serviceWorker from './serviceWorker';
 import { createStore, applyMiddleware } from 'redux';
 import { Provider } from 'react-redux';
-import { watchLogin } from './sagas/saga';
+import rootSaga from './sagas/saga';
 import rootReducer from './reducers/rootReducer';
 import createSagaMiddleware from 'redux-saga';
 
@@ -15,10 +15,11 @@ const sagaMiddleware = createSagaMiddleware();
 const store = createStore(rootReducer, applyMiddleware(sagaMiddleware));
 
 store.subscribe(() => {
-  localStorage.setItem('reduxState', JSON.stringify(store.getState()))
+  const state = store.getState();
+  localStorage.setItem('reduxStateToken', state.client.authToken)
 });
 
-sagaMiddleware.run(watchLogin);
+sagaMiddleware.run(rootSaga);
 
 ReactDOM.render(<Provider store={store}><App /></Provider>, document.getElementById('root'));
 

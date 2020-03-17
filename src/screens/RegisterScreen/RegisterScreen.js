@@ -1,7 +1,6 @@
-import React from 'react';
+import React, { useRef, useState } from 'react';
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
-import CssBaseline from '@material-ui/core/CssBaseline';
 import TextField from '@material-ui/core/TextField';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
@@ -11,9 +10,12 @@ import Box from '@material-ui/core/Box';
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
+import { useDispatch } from 'react-redux';
 import Container from '@material-ui/core/Container';
 import Copyright from './../../components/Copyright/Copyright';
-
+import CircularProgress from '@material-ui/core/CircularProgress';
+import { withRouter } from 'react-router-dom';
+import { ACTION_TYPES } from './../../common/constants';
 
 const useStyles = makeStyles(theme => ({
   paper: {
@@ -35,12 +37,51 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-function RegisterScreen() {
-  const classes = useStyles();
 
+function RegisterScreen(props) {
+  const classes = useStyles();
+  const dispatch = useDispatch();
+  const [apiRequestPending, setApiRequestPending] = useState(false);
+  const [errorState, setErrorState] = useState({});
+  const usernameRef = useRef(null);
+  let emailRef = useRef(null);
+  let passwordRef = useRef(null);
+
+  const handleError = (responseData) => {
+    console.log(responseData);
+    setErrorState(responseData);
+  }
+
+  const renderLoadingDiv = () => {
+    return (
+      <div className="loading-icon">
+        <CircularProgress color="secondary" />
+      </div>
+    );
+  }
+
+  const redirectToLogin = () => {
+    props.history.push('/login');
+  }
+
+  const handleRegister = (e) => {
+    e.preventDefault();
+    const email = emailRef.current.value;
+    const password = passwordRef.current.value;
+    const username = usernameRef.current.value;
+
+    dispatch({
+      type: ACTION_TYPES.REGISTER,
+      username,
+      email,
+      password,
+      setApiRequestPending,
+      handleError,
+      redirectToLogin
+    });
+  }
   return (
     <Container component="main" maxWidth="xs">
-      <CssBaseline />
       <div className={classes.paper}>
         <Avatar className={classes.avatar}>
           <LockOutlinedIcon />
@@ -50,34 +91,28 @@ function RegisterScreen() {
         </Typography>
         <form className={classes.form} noValidate>
           <Grid container spacing={2}>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                autoComplete="fname"
-                name="firstName"
-                variant="outlined"
-                required
-                fullWidth
-                id="firstName"
-                label="First Name"
-                autoFocus
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
+            <Grid item xs={12}>
               <TextField
                 variant="outlined"
+                error={errorState.hasOwnProperty("username")}
+                helperText={errorState.hasOwnProperty("username") && errorState.username[0]}
                 required
                 fullWidth
-                id="lastName"
-                label="Last Name"
-                name="lastName"
-                autoComplete="lname"
+                inputRef={usernameRef}
+                id="username"
+                label="Username"
+                name="username"
+                autoComplete="username"
               />
             </Grid>
             <Grid item xs={12}>
               <TextField
                 variant="outlined"
+                error={errorState.hasOwnProperty("email")}
+                helperText={errorState.hasOwnProperty("email") && errorState.email[0]}
                 required
                 fullWidth
+                inputRef={emailRef}
                 id="email"
                 label="Email Address"
                 name="email"
@@ -87,19 +122,16 @@ function RegisterScreen() {
             <Grid item xs={12}>
               <TextField
                 variant="outlined"
+                error={errorState.hasOwnProperty("password")}
+                helperText={errorState.hasOwnProperty("password") && errorState.password[0]}
                 required
                 fullWidth
+                inputRef={passwordRef}
                 name="password"
                 label="Password"
                 type="password"
                 id="password"
                 autoComplete="current-password"
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <FormControlLabel
-                control={<Checkbox value="allowExtraEmails" color="primary" />}
-                label="I want to receive inspiration, marketing promotions and updates via email."
               />
             </Grid>
           </Grid>
@@ -109,6 +141,7 @@ function RegisterScreen() {
             variant="contained"
             color="primary"
             className={classes.submit}
+            onClick={handleRegister}
           >
             Sign Up
           </Button>
@@ -121,6 +154,8 @@ function RegisterScreen() {
           </Grid>
         </form>
       </div>
+      {apiRequestPending && renderLoadingDiv()}
+
       <Box mt={5}>
         <Copyright />
       </Box>
@@ -128,4 +163,4 @@ function RegisterScreen() {
   );
 }
 
-export default RegisterScreen;
+export default withRouter(RegisterScreen);

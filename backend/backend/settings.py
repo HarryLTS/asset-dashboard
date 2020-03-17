@@ -9,18 +9,20 @@ https://docs.djangoproject.com/en/3.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.0/ref/settings/
 """
-
+import sys
+sys.path.insert(1, './../secret.py')
+from secret import *
 import os
+from corsheaders.defaults import default_headers
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '9n(s-su&q($b7!r$pqk(b-3++0chq8=0piv7y@#a@n+!v8t6i!'
+SECRET_KEY = DJANGO_SECRET_KEY
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -76,7 +78,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'backend.wsgi.application'
-
 
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
@@ -144,3 +145,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
 STATIC_URL = '/static/'
+
+CORS_ALLOW_HEADERS = default_headers + (
+    'stockcommand', 'stocksymbol', 'stockquantity',
+    'cashflowcommand', 'cashflowtitle', 'cashflowvalue', 'cashflowfrequency', 'cashflowid',
+    'editlogcommand', 'editlogdescription', 'editlogvalue', 'editlogid',
+    'estatecommand', 'estateaddress', 'estatevalue', 'estateipr', 'estateid'
+)

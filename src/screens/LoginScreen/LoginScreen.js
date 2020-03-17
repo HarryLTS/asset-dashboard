@@ -14,7 +14,8 @@ import { useDispatch } from 'react-redux';
 import Container from '@material-ui/core/Container';
 import Copyright from './../../components/Copyright/Copyright';
 import CircularProgress from '@material-ui/core/CircularProgress';
-import {withRouter} from 'react-router-dom';
+import { withRouter } from 'react-router-dom';
+import { ACTION_TYPES } from './../../common/constants';
 import './LoginScreen.css';
 
 const useStyles = makeStyles(theme => ({
@@ -54,9 +55,9 @@ function LoginScreen(props) {
       const email = emailRef.current.value;
       const password = passwordRef.current.value;
       dispatch({
-        type:'LOGIN',
-        email: email,
-        password: password,
+        type: ACTION_TYPES.LOGIN,
+        email,
+        password,
         setApiRequestPending,
         setError,
         redirectToHome
@@ -114,10 +115,6 @@ function LoginScreen(props) {
             type="password"
             id="password"
             autoComplete="current-password"
-          />
-          <FormControlLabel
-            control={<Checkbox value="remember" color="primary" />}
-            label="Remember me"
           />
           <Button
             type="submit"
