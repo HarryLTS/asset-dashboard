@@ -58,6 +58,8 @@ export default function CashFlows(props) {
 
   const handleClose = () => {
     setOpen(false);
+    setAddressError("");
+    setValueError("");
   }
 
   const handleCreateEstate = () => {
@@ -70,10 +72,14 @@ export default function CashFlows(props) {
     if (address === "") {
       setAddressError(ADDRESS_BLANK_ERROR);
       valid = false;
+    } else {
+      setAddressError("");
     }
     if (Number.isNaN(value) || value < 0) {
       setValueError(VALUE_INVALID_ERROR);
       valid = false;
+    } else {
+      setValueError("");
     }
     if (!valid) return;
 
@@ -174,7 +180,7 @@ export default function CashFlows(props) {
             control={
               <Checkbox
                 color="primary"
-                checked={estateData.estate_list[dialogInfo.id].is_primary_residence}
+                defaultChecked={estateData.estate_list[dialogInfo.id].is_primary_residence}
                 inputRef={iprEditRef}
               />
             }

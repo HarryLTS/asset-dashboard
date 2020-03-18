@@ -53,18 +53,15 @@ export default function CashFlows(props) {
             setOpen(true);
           }}>Add Cash Flow</Button>
         </div>
-        <div className="cash-flow-edit__expenditure">
-          <Button color="secondary" onClick={()=>{
-            setDialogInfo({type: "add"});
-            setOpen(true);
-          }}>Add Expenditure</Button>
-        </div>
       </div>
     );
   }
 
   const handleClose = () => {
     setOpen(false);
+    setTitleError("");
+    setValueError("");
+    setFrequencyError("");
   }
 
   const handleCreateCashFlow = () => {
@@ -77,14 +74,20 @@ export default function CashFlows(props) {
     if (title === "") {
       setTitleError(TITLE_BLANK_ERROR);
       valid = false;
+    } else {
+      setTitleError("");
     }
     if (Number.isNaN(value)) {
       setValueError(VALUE_NAN_ERROR);
       valid = false;
+    } else {
+      setValueError("");
     }
     if (Number.isNaN(frequency) || frequency <= 0) {
       setFrequencyError(FREQUENCY_NAN_ZERO_ERROR);
       valid = false;
+    } else {
+      setFrequencyError("");
     }
 
     if (!valid) return;

@@ -37,6 +37,7 @@ export default function CashEditLogs(props) {
 
   const handleClose = () => {
     setOpen(false);
+    setValueError("");
   }
 
 
@@ -47,6 +48,8 @@ export default function CashEditLogs(props) {
       if (Number.isNaN(value)) {
         setValueError(INVALID_VALUE);
         return;
+      } else {
+        setValueError("");
       }
 
       setValueError("");

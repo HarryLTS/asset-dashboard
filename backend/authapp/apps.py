@@ -12,18 +12,8 @@ import json
 import datetime
 from django.utils.timezone import get_current_timezone
 
+# adding functionality to scheduler
 def run_continuously(self, interval=1):
-    """Continuously run, while executing pending jobs at each elapsed
-    time interval.
-    @return cease_continuous_run: threading.Event which can be set to
-    cease continuous run.
-    Please note that it is *intended behavior that run_continuously()
-    does not run missed jobs*. For example, if you've registered a job
-    that should run every minute and you set a continuous run interval
-    of one hour then your job won't be run 60 times at each interval but
-    only once.
-    """
-
     cease_continuous_run = threading.Event()
 
     class ScheduleThread(threading.Thread):
@@ -42,28 +32,32 @@ def run_continuously(self, interval=1):
 
 Scheduler.run_continuously = run_continuously
 
-SECONDS_IN_DAY = 60 * 60
+SECONDS_IN_DAY = 60  # determines how often cash flows run
+
 
 def start_scheduler():
     from .models import Stock, User, CashEditLog, CashFlow
+
     def update_cash_flows():
+        cycles = 0
         for user in User.objects.all():
             for cash_flow in user.cash_flows.all():
-                now = datetime.datetime.now(tz=get_current_timezone());
+                now = datetime.datetime.now(tz=get_current_timezone())
                 delta = (now - cash_flow.last_invoked).total_seconds()
                 interval = cash_flow.frequency * SECONDS_IN_DAY
                 while delta > interval:
                     cash_flow.last_invoked = cash_flow.last_invoked + datetime.timedelta(seconds=interval)
+                    cash_flow.total_value_accrued = cash_flow.total_value_accrued + cash_flow.value
                     edit_log = CashEditLog(value=cash_flow.value, description=cash_flow.title + " Automatic", time_created=now)
                     edit_log.save()
                     user.cash_edit_logs.add(edit_log)
                     user.cash_amount = user.cash_amount + cash_flow.value
-                    print(user.cash_amount)
-                    print(cash_flow.value)
                     delta = (now - cash_flow.last_invoked).total_seconds()
-                    print(cash_flow.title, delta, interval)
+                    cycles += 1
+
                 cash_flow.save()
             user.save()
+        print("Cash flows updated. Cycles run: {}.".format(cycles))
 
     def update():
         update_cash_flows()
@@ -79,15 +73,17 @@ def start_scheduler():
             response = requests.request("GET", request_url, headers=headers, data=payload)
 
             try:
+                # load response data into object
                 data = json.loads(response.text.encode('utf8'))
-                if 'name' in data:
+                if 'name' in data: # if dict is empty, means no data is available
                     stock.name_status = FIELD_VALID
                     stock.name = data['name']
                 else:
                     stock.name_status = FIELD_INVALID
 
             except json.decoder.JSONDecodeError:
-                stock.name_status = FIELD_UNSETTLED
+                # decode error means API returned a string saying the limit was exceeded
+                pass
 
             stock.save()
 
@@ -102,6 +98,7 @@ def start_scheduler():
             response = requests.request("GET", request_url, headers=headers, data=payload)
 
             try:
+                # load response data into object
                 data = json.loads(response.text.encode('utf8'))
 
                 if bool(data) and data['c'] != 0:  # checks if dict is not empty
@@ -111,16 +108,19 @@ def start_scheduler():
                     stock.quote_status = FIELD_INVALID
 
             except json.decoder.JSONDecodeError:
-                stock.quote_status = FIELD_UNSETTLED
+                # decode error means API returned a string saying the limit was exceeded
+                pass
+
             stock.save()
 
         stocks = Stock.objects.order_by("-last_updated")
+
         fields_changed = 0
         for stock in stocks:
-            if stock.name_status == FIELD_UNSETTLED:
+            if stock.name_status != FIELD_INVALID:
                 update_stock_name(stock)
                 fields_changed += 1
-            if stock.quote_status == FIELD_UNSETTLED:
+            if stock.quote_status != FIELD_INVALID:
                 update_stock_quote(stock)
                 fields_changed += 1
         print('Updated at {}. Fields changed: {}'.format(datetime.datetime.now(tz=get_current_timezone()), fields_changed))
@@ -133,5 +133,6 @@ def start_scheduler():
 class AuthappConfig(AppConfig):
     name = 'authapp'
 
+    # runs on startup
     def ready(self):
         start_scheduler()

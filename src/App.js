@@ -33,6 +33,7 @@ function App() {
             <PrivateRoute path='/estate' component={EstateScreen} />
             <PrivateRoute path='/cash' component={CashScreen} />
             <Route path='/'>
+              <h1>Sign In</h1>
               <NotFoundScreen />
             </Route>
           </Switch>

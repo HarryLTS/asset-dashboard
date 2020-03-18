@@ -49,6 +49,8 @@ export default function StockOptions(props) {
   const authToken = useSelector(state => state.client.authToken);
   const dispatch = useDispatch();
   const stockData = useSelector(state => state.client.stockData);
+  const [symbolError, setSymbolError] = useState("");
+  const [quantityError, setQuantityError] = useState("");
 
   const renderDialog = () => {
       if (!open || dialogInfo === null) return;
@@ -58,6 +60,13 @@ export default function StockOptions(props) {
 
   const handleEdit = (symbol) => {
     const quantity = editQuantityRef.current.valueAsNumber;
+
+    if (Number.isNaN(quantity)) {
+      setQuantityError("This quantity is invalid.");
+      return;
+    } else {
+      setQuantityError("");
+    }
 
     dispatch({
       type: ACTION_TYPES.UPDATE_CLIENT_STOCK_DATA,
@@ -91,10 +100,12 @@ export default function StockOptions(props) {
             margin="dense"
             id="quantity"
             label="Quantity"
-            defaultValue={1}
+            defaultValue={stockData.data_by_symbol[dialogInfo.symbol].quantity}
             inputRef={editQuantityRef}
             onChange={verifyIntegerInput}
             type="number"
+            error={quantityError != ""}
+            helperText={quantityError}
             fullWidth
           />
         </DialogContent>
@@ -126,6 +137,8 @@ export default function StockOptions(props) {
             margin="dense"
             id="symbol"
             label="Symbol"
+            error={symbolError != ""}
+            helperText={symbolError}
             inputProps={{
               maxLength: 5,
             }}
@@ -141,6 +154,8 @@ export default function StockOptions(props) {
             onChange={verifyIntegerInput}
             inputRef={addQuantityRef}
             type="number"
+            error={quantityError != ""}
+            helperText={quantityError}
             fullWidth
           />
         </DialogContent>
@@ -167,12 +182,30 @@ export default function StockOptions(props) {
   }
 
   const handleClose = () => {
+    setSymbolError("");
+    setQuantityError("");
     setOpen(false);
   }
 
   const handleAdd = () => {
     const symbol = addSymbolRef.current.value.toUpperCase();
     const quantity = addQuantityRef.current.valueAsNumber;
+
+    let valid = true;
+    if (symbol.length < 2) {
+      setSymbolError("This symbol's length is too short.");
+      valid = false;
+    } else {
+      setSymbolError("");
+    }
+    if (Number.isNaN(quantity)) {
+      setQuantityError("This quantity is invalid.");
+      valid = false;
+    } else {
+      setQuantityError("");
+    }
+    if (!valid) return;
+
     dispatch({
       type: ACTION_TYPES.UPDATE_CLIENT_STOCK_DATA,
       command: 'add',
@@ -190,7 +223,7 @@ export default function StockOptions(props) {
     Object.keys(stockData.data_by_symbol).forEach((symbol, i) => {
       const currentStock = stockData.data_by_symbol[symbol];
       if (currentStock.quote_status === 'invalid') invalidRows.push({id: i, symbol});
-      else if (currentStock.quote_status === 'unsettled') unsettledRows.push({id: i, symbol});
+      else if (currentStock.quote_status === 'unsettled') unsettledRows.push({id: i, symbol, quantity: currentStock.quantity});
       else validRows.push(createData(i, symbol, currentStock.name_status === 'valid' ? currentStock.name : "-", currentStock.quote.c, currentStock.quantity));
     });
 
@@ -222,7 +255,7 @@ export default function StockOptions(props) {
           <TableCell>{row.symbol}</TableCell>
           <TableCell>-</TableCell>
           <TableCell>-</TableCell>
-          <TableCell>-</TableCell>
+          <TableCell>{row.quantity}</TableCell>
           <TableCell>-</TableCell>
           {
           props.editMode &&
